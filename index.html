@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <title>Hệ Thống Test Kỹ Thuật Nhà Máy</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="questions_data.js"></script>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col items-center p-6">
     <div class="max-w-xl w-full bg-white p-8 rounded-xl shadow-lg">
         <h1 class="text-2xl font-bold text-center text-blue-600 mb-6">Bài Test Kỹ Thuật Hàng Ngày</h1>
         
-        <!-- Màn hình nhập tên & chọn phần thi -->
         <div id="setup-screen" class="space-y-4">
             <div>
                 <label class="block text-gray-700 font-semibold mb-2">Họ và tên nhân sự:</label>
@@ -21,7 +21,6 @@
             </div>
         </div>
 
-        <!-- Màn hình làm bài -->
         <div id="quiz-screen" class="hidden space-y-6">
             <div class="flex justify-between items-center border-b pb-3">
                 <span id="display-info" class="font-bold text-blue-600"></span>
@@ -31,7 +30,6 @@
             <button onclick="submitQuiz()" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition">Nộp Bài</button>
         </div>
 
-        <!-- Màn hình kết quả -->
         <div id="result-screen" class="hidden text-center space-y-4">
             <h2 class="text-2xl font-bold text-gray-800">Kết Quả Bài Test</h2>
             <div id="score-display" class="text-4xl font-extrabold text-blue-600"></div>
@@ -45,11 +43,14 @@
         let currentQuiz = [];
         let userInfo = { name: '', category: '' };
 
-        // Tự động tải file questions.json ngay khi mở trang web
-        fetch('questions.json')
-            .then(response => response.json())
-            .then(data => { allQuestions = data; })
-            .catch(error => alert('Không thể tải dữ liệu câu hỏi từ file questions.json'));
+        // Gán dữ liệu từ file questions_data.js vào biến toàn cục khi tải trang
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof questions !== 'undefined') {
+                allQuestions = questions;
+            } else {
+                alert('Không thể tải dữ liệu câu hỏi từ file questions_data.js!');
+            }
+        });
 
         function startTest(category) {
             const name = document.getElementById('username').value.trim();
@@ -62,13 +63,13 @@
             // Lọc câu hỏi theo danh mục
             let filtered = allQuestions.filter(q => q.category === category);
             if (filtered.length === 0) {
-                alert('Chưa có câu hỏi cho phần này trong file questions.json!');
+                alert('Chưa có câu hỏi cho phần này trong hệ thống!');
                 return;
             }
 
-            // Thuật toán lấy ngẫu nhiên 10 câu
-            filtered.sort(() => Math.random() - 0.5);
-            currentQuiz = filtered.slice(0, 10);
+            // Thuật toán lấy ngẫu nhiên 10 câu không trùng lặp trong bộ đề
+            let shuffled = [...filtered].sort(() => Math.random() - 0.5);
+            currentQuiz = shuffled.slice(0, 10);
 
             // Chuyển màn hình
             document.getElementById('setup-screen').classList.add('hidden');
